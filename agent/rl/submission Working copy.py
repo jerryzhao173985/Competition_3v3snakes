@@ -80,65 +80,65 @@ def get_observations(state, agents_index, obs_dim, height, width):
     return observations
 
 
-# class Actor(nn.Module):
-#     def __init__(self, obs_dim, act_dim, num_agents, args, output_activation='softmax'):
-#         super().__init__()
+class Actor(nn.Module):
+    def __init__(self, obs_dim, act_dim, num_agents, args, output_activation='softmax'):
+        super().__init__()
 
-#         self.obs_dim = obs_dim
-#         self.act_dim = act_dim
-#         self.num_agents = num_agents
+        self.obs_dim = obs_dim
+        self.act_dim = act_dim
+        self.num_agents = num_agents
 
-#         self.args = args
+        self.args = args
 
-#         sizes_prev = [obs_dim, HIDDEN_SIZE]
-#         sizes_post = [HIDDEN_SIZE, HIDDEN_SIZE, act_dim]
+        sizes_prev = [obs_dim, HIDDEN_SIZE]
+        sizes_post = [HIDDEN_SIZE, HIDDEN_SIZE, act_dim]
 
-#         self.prev_dense = mlp(sizes_prev)
-#         self.post_dense = mlp(sizes_post, output_activation=output_activation)
+        self.prev_dense = mlp(sizes_prev)
+        self.post_dense = mlp(sizes_post, output_activation=output_activation)
 
-#     def forward(self, obs_batch):
-#         out = self.prev_dense(obs_batch)
-#         out = self.post_dense(out)
-#         return out
-
-
-# class RLAgent(object):
-#     def __init__(self, obs_dim, act_dim, num_agent):
-#         self.obs_dim = obs_dim
-#         self.act_dim = act_dim
-#         self.num_agent = num_agent
-#         self.device = device
-#         self.output_activation = 'softmax'
-#         self.actor = Actor(obs_dim, act_dim, num_agent, self.output_activation).to(self.device)
-
-#     def choose_action(self, obs):
-#         obs = torch.Tensor([obs]).to(self.device)
-#         logits = self.actor(obs).cpu().detach().numpy()[0]
-#         return logits
-
-#     def select_action_to_env(self, obs, ctrl_index):
-#         logits = self.choose_action(obs)
-#         actions = logits2action(logits)
-#         action_to_env = to_joint_action(actions, ctrl_index)
-#         return action_to_env
-
-#     def load_model(self, filename):
-#         self.actor.load_state_dict(torch.load(filename))
+    def forward(self, obs_batch):
+        out = self.prev_dense(obs_batch)
+        out = self.post_dense(out)
+        return out
 
 
-# def to_joint_action(action, ctrl_index):
-#     joint_action_ = []
-#     action_a = action[ctrl_index]
-#     each = [0] * 4
-#     each[action_a] = 1
-#     joint_action_.append(each)
-#     return joint_action_
+class RLAgent(object):
+    def __init__(self, obs_dim, act_dim, num_agent):
+        self.obs_dim = obs_dim
+        self.act_dim = act_dim
+        self.num_agent = num_agent
+        self.device = device
+        self.output_activation = 'softmax'
+        self.actor = Actor(obs_dim, act_dim, num_agent, self.output_activation).to(self.device)
+
+    def choose_action(self, obs):
+        obs = torch.Tensor([obs]).to(self.device)
+        logits = self.actor(obs).cpu().detach().numpy()[0]
+        return logits
+
+    def select_action_to_env(self, obs, ctrl_index):
+        logits = self.choose_action(obs)
+        actions = logits2action(logits)
+        action_to_env = to_joint_action(actions, ctrl_index)
+        return action_to_env
+
+    def load_model(self, filename):
+        self.actor.load_state_dict(torch.load(filename))
 
 
-# def logits2action(logits):
-#     logits = torch.Tensor(logits).to(device)
-#     actions = np.array([Categorical(out).sample().item() for out in logits])
-#     return np.array(actions)
+def to_joint_action(action, ctrl_index):
+    joint_action_ = []
+    action_a = action[ctrl_index]
+    each = [0] * 4
+    each[action_a] = 1
+    joint_action_.append(each)
+    return joint_action_
+
+
+def logits2action(logits):
+    logits = torch.Tensor(logits).to(device)
+    actions = np.array([Categorical(out).sample().item() for out in logits])
+    return np.array(actions)
 
 
 # agent = RLAgent(26, 4, 3)
@@ -251,7 +251,7 @@ def my_controller(observation_list, action_space_list, is_act_continuous):
     o_index = obs['controlled_snake_index']  # 2, 3, 4, 5, 6, 7 -> indexs = [0,1,2,3,4,5]
     
     print("--------this is for snake--------- ", o_index-2)
-    # print(obs)
+    print(obs)
     if obs['last_direction']==None:
         last_step_actions = torch.zeros(1,3,4)
     else:
@@ -272,15 +272,15 @@ def my_controller(observation_list, action_space_list, is_act_continuous):
                 a_val = 3
                     
             last_step_a.append(a_val)
-        # print(last_step_str)
-        # print("last_step_a: ", last_step_a)
+        print(last_step_str)
+        print("last_step_a: ", last_step_a)
         
         last_step_encoded = [encode(step_a) for step_a in last_step_a]
         last_step_actions = torch.tensor(last_step_encoded)
         
         # last_step_actions ----> torch.Size([1, 3, 4])
     
-    # print("last_step_actions", last_step_actions, last_step_actions.size())
+    print("last_step_actions", last_step_actions, last_step_actions.size())
 
     o_indexs_min = 3 if o_index > 4 else 0
     indexs = [o_indexs_min, o_indexs_min+1, o_indexs_min+2]

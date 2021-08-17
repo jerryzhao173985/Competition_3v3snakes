@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import random
-from agent.rl.submission import controller, get_observations, encode
+from agent.rl.submission import agent, get_observations
 from env.chooseenv import make
 from tabulate import tabulate
 import argparse
@@ -17,41 +17,12 @@ def get_actions(state, algo, indexs):
 
     # rl agent
     if algo == 'rl':
-
-        if state['last_direction']==None:
-            last_step_actions = torch.zeros(1,3,4)
-        else:
-            last_step_str = state['last_direction'][:3]
-            last_step_a = []
-            for i in range(3):
-                a_str = last_step_str[i]
-                if a_str == 'up':
-                    a_val = 0
-                elif a_str == 'down':
-                    a_val = 1
-                elif a_str == 'left':
-                    a_val = 2
-                elif a_str == 'right':
-                    a_val = 3
-                last_step_a.append(a_val)
-            
-            last_step_encoded = [encode(step_a) for step_a in last_step_a]
-            last_step_actions = torch.tensor(last_step_encoded)
-            
-            
         obs = get_observations(state, indexs, obs_dim=26, height=10, width=20)
-        # logits = agent.choose_action(obs)
-        # logits = torch.Tensor(logits)
-        # actions = np.array([Categorical(out).sample().item() for out in logits])
-        # print(actions)
-
-        inputs = torch.tensor([obs])
-        actions = controller.select_actions(inputs, last_step_actions, test_mode=True)
-        actions = actions.cpu().detach().numpy()
-        # print(actions, type(actions)) # [1 1 1] <class 'numpy.ndarray'>
+        logits = agent.choose_action(obs)
+        logits = torch.Tensor(logits)
+        actions = np.array([Categorical(out).sample().item() for out in logits])
 
     return actions
-    # [0 3 3]
 
 
 def get_join_actions(obs, algo_list):
@@ -83,7 +54,7 @@ def run_game(env, algo_list, episode, verbose=False):
             next_state, reward, done, _, info = env.step(env.encode(joint_action))  # (6,6,bool,_,4)
 
             # print(len(next_state[0]), reward[0],  len(info))   #(11, 0, 4)
-            # print(joint_action)
+            print(joint_action)
 
             reward = np.array(reward)
             episode_reward += reward
