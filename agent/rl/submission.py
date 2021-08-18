@@ -218,7 +218,8 @@ groups = {
 
 # print(scheme)
 controller = BasicMAC(scheme, groups, args)
-controller.load_models("agent/rl")
+controller.load_models("agent/rl/trained_model/1500200")
+# Checkpoint from 200 to 2050,200
 
 # def __init__(self, obs_dim, act_dim, num_agent):
 #     self.obs_dim = obs_dim
