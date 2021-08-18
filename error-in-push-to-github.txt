@@ -1,0 +1,7 @@
+if have error push to github:
+
+You can use this
+
+```git push origin HEAD:master```
+
+When in the command line you cannot push to master
